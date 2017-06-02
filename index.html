@@ -6,8 +6,16 @@
   </head>
   <body>
     <div id="app">
-      <data-table :table-head="tableHead" :table-data="tableData">
+      <data-table :table-head="tableHead"
+                  :table-data="tableData"
+                  :table-checkbox="true"
+                  :table-index="true"
+                  ref="child"
+                  @row-click="rowClick">
       </data-table>
+      <div style="margin-top:30px">
+      <input type="button" value="获取选中值" @click="getCheckedRow">
+      </div>
     </div>
     <script src="/dist/build.js"></script>
   </body>

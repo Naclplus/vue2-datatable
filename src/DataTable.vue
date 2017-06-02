@@ -19,6 +19,15 @@
     <table>
       <thead>
         <tr>
+          <th v-if="this.tableCheckbox">
+            <label class="dt-checkbox">
+              <input type="checkbox" v-model="checkedAll" @click.stop="checkAll">
+              <i></i>
+            </label>
+          </th>
+          <th v-if="this.tableIndex" class="left">
+            Index
+          </th>
           <th v-for="(item, index) in tableHead"
               class="sorting left"
               :class="{
@@ -31,9 +40,23 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(item, index) in getList" :class="index % 2 == 0 ? 'odd' : 'even'">
+        <tr v-for="(item, index) in getList" :class="index % 2 == 0 ? 'odd' : 'even'" @click="rowClick(item)">
+          <td v-if="tableCheckbox" style="text-align: center" @click.stop>
+            <label class="dt-checkbox" >
+              <input type="checkbox" :value="item"  v-model="checked"/>
+              <i></i>
+            </label>
+          </td>
+          <td v-if="tableIndex">
+            {{index + 1}}
+          </td>
           <template v-for="t in tableHead">
-            <td>{{item[t.columnAttr]}}</td>
+            <td>
+              <template v-if="!t.type">{{item[t.columnAttr]}}</template>
+              <template v-else-if="t.type=='custom'">
+                <component  :is="t.custom" :row-data="item"></component>
+              </template>
+            </td>
           </template>
         </tr>
       </tbody>
@@ -85,11 +108,30 @@
 <script>
 export default {
   name: 'app',
-  props:['tableHead', 'tableData'],
+  props: {
+      tableHead: {
+          required: true
+      },
+      tableData: {
+          required: true,
+      },
+      tableCheckbox: {
+          required: false,
+          type : Boolean,
+          default : false
+      },
+      tableIndex: {
+          required: false,
+          type : Boolean,
+          default : false
+      }
+  },
   data () {
     return {
         pageEntry : 10,
         currentPage : 1,
+        checkedAll: "",
+        checked : [],
         rows : '',
         search : '',
         sort: {
@@ -166,6 +208,7 @@ export default {
           });
       }
       this.rows = arr;
+      this.checked = [];
       return arr.slice((this.currentPage - 1) * this.pageEntry, (this.currentPage) * this.pageEntry);;
     },
     sorting(column){
@@ -193,10 +236,36 @@ export default {
     },
     searchFn(){
         this.currentPage = 1;
+    },
+    rowClick(item){
+        this.$emit('row-click', item);
+    },
+    checkAll(){
+      if(this.checkedAll){
+          this.checked = [];
+          for(let i = 0; i < this.getList.length; i ++){
+              this.checked.push(this.getList[i]);
+          }
+      }else{
+          this.checked = [];
+      }
     }
   },
   mounted(){
       this.sort.sortBy = this.tableHead[0].columnAttr;
+  },
+  watch :{
+      checked : function(val, oldVal){
+          if(val.length == this.getList.length){
+              this.checkedAll = true;
+          }else{
+              this.checkedAll = false;
+          }
+
+      },
+      pageEntry : function(){
+          this.currentPage = 1;
+      }
   }
 
 }
@@ -245,6 +314,9 @@ table>thead>tr>th,table>tbody>tr>td  {
 }
 table>tbody>tr.odd{
   background-color: #f9f9f9;
+}
+table>tbody>tr:hover{
+  background-color: #ecf3f8;
 }
 .dt-toolbar-footer{
   background: #fafafa;
@@ -353,4 +425,10 @@ input:focus, select:focus{
   -ms-user-select: none;
   user-select: none;
 }
+.dt-checkbox {font-size:12px;cursor:pointer;}
+.dt-checkbox i {font-size:12px;font-style:normal;display:inline-block;width:12px;height:12px;text-align:center;line-height:12px;color:#fff;vertical-align:middle;margin:-2px 2px 1px 0px;border:#2489c5 1px solid;}
+input[type="checkbox"]{display:none;}
+input[type="checkbox"]:checked + i {background:#2489c5;}
+input[type="checkbox"]:checked + i:after{content:'✓'}
+input[type="checkbox"]:disabled + i {border-color:#ccc;}
 </style>
