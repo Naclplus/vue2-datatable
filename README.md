@@ -1,6 +1,6 @@
 # vue2-datatable
 
-> vue2-datatable
+> npm install vue2-datatable
 
 ## Build Setup
 
