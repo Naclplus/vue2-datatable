@@ -1,6 +1,7 @@
 # vue2-datatable
 
 > npm install vue2-datatable
+> [Live Demo](http://http://z1259678404.oicp.net/)
 
 ## Build Setup
 
